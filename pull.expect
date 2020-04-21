@@ -1,11 +1,8 @@
 #!usr/bin/expect -f
 
-#go into git local
-cd Discord-Scratch-Bot
-
 #starting git pull
 echo "start git pull"
-git pull
+spawn "git pull"
 
 expect ":"
 send "gamepro110/r"
