@@ -7,8 +7,8 @@ cd Discord-Scratch-Bot
 echo "start git pull"
 git pull
 
-expect "Username"
+expect ":"
 send "gamepro110/r"
 
-expect "Password"
+expect ":"
 send "Itunespro1\r"
