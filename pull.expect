@@ -1,11 +1,9 @@
 #!usr/bin/expect -f
 
-#starting git pull
-echo "start git pull"
-spawn "git pull"
+set timeout 30
+spawn git pull
+expect "Username for 'https://github.com':"
+send "gamepro110/r"\
 
-expect ":"
-send "gamepro110/r"
-
-expect ":"
+expect "Password for 'https://gamepro110@github.com':"
 send "Itunespro1\r"
