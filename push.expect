@@ -3,7 +3,7 @@
 spawn git push
 expect "Username for 'https://github.com': "
 send "gamepro110"
-send "\r
+send "\r"
 
 expect "Password for 'https://gamepro110@github.com': "
 send "Itunespro1"
