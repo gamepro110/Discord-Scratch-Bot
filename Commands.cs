@@ -71,7 +71,7 @@ namespace ScratchBot
             embed.AddField(f =>
             {
                 f.Name = $"__**{info.Name}**__";
-                f.Value = $"**how to use** `{info.Aliases[0]}`\n" +
+                f.Value = $"**how to use** `{BotMain.CMDPrefix}{info.Aliases[0]}`\n" +
                 $"{info.Summary}\n" +
                 (!string.IsNullOrEmpty(info.Remarks) ? $"{info.Remarks}\n" : "");
             });
@@ -197,6 +197,7 @@ namespace ScratchBot
         #region sudo
 
         [Group("sudo")]
+        [RequireOwner(ErrorMessage = "yo aint no owner")]
         public class Sudo : ModuleBase<SocketCommandContext>
         {
             #region ping

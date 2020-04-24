@@ -22,6 +22,8 @@ namespace ScratchBot
         private readonly IServiceProvider m_services = null;
         private static CancellationTokenSource m_cancellationTokenSource = null;
 
+        internal const string CMDPrefix = "$";
+
         #region getters
 
         internal static BotMain instance = null;
@@ -173,7 +175,7 @@ namespace ScratchBot
             int pos = 0;
 
             //HasMentionPrefix(m_sockClient.CurrentUser
-            if (msg.HasStringPrefix("$", ref pos))
+            if (msg.HasStringPrefix(CMDPrefix, ref pos))
             {
                 SocketCommandContext context = new SocketCommandContext(m_sockClient, msg);
 
