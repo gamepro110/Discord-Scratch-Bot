@@ -46,7 +46,7 @@ namespace ScratchBot
                     return;
                 }
 
-                _embed.Description = (_mod.Submodules.Any() ? $"Sub mods: {string.Join(", ", _mod.Submodules.Select(m => m.Name))}" : "");
+                _embed.Description = (_mod.Submodules.Any() ? $"Sub mods: {string.Join(", ", BotMain.CMDPrefix + _mod.Submodules.Select(m => m.Name))}" : "");
             }
 
             _embed.Title = _mod.Name;
