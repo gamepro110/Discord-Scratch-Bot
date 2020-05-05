@@ -2,6 +2,7 @@
 using Discord.Commands;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Threading.Tasks;
@@ -14,6 +15,17 @@ namespace ScratchBot
         public async Task No()
         {
             await ReplyAsync("awh :crying_cat_face:");
+        }
+
+        [Command("wisp", true), Description("leaving a message without peeps knowing who it comes from")]
+        [RequireUserPermission(ChannelPermission.ManageMessages), RequireBotPermission(ChannelPermission.ManageMessages)]
+        public async Task Wisp([Remainder]string msg)
+        {
+            EmbedBuilder _embed = new EmbedBuilder();
+
+            await (Context.Channel as ITextChannel).DeleteMessageAsync(Context.Message);
+
+            await ReplyAsync(msg, embed: _embed.Description != "" ? _embed.Description != null ? _embed.Build() : null : null);
         }
 
         #region Help
@@ -271,11 +283,12 @@ namespace ScratchBot
                     }
                     else
                     {
-                        await (Context.Channel as ITextChannel).DeleteMessagesAsync(_filteredMessages);
+                        await (Context.Channel as ITextChannel).DeleteMessagesAsync(_filteredMessages);//deletes previous messages
+                        await (Context.Channel as ITextChannel).DeleteMessageAsync(Context.Message);//deletes calling messages
 
                         _em.Color = Color.Green;
                         _em.Title = "did thing. you proud??";
-                        _em.Description = $"deleted {_filteredCount} {(_filteredCount > 1 ? "messages" : "message")}.";
+                        _em.Description = $"deleted {_filteredCount + 1} {(_filteredCount > 1 ? "messages" : "message")}.";
                     }
                 }
 
