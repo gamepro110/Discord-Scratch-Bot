@@ -22,6 +22,8 @@ namespace ScratchBot
         private readonly IServiceProvider m_services = null;
         private static CancellationTokenSource m_cancellationTokenSource = null;
 
+        private LoggingService m_logging = null;
+
         internal const string CMDPrefix = "$";
 
         #region getters
@@ -48,12 +50,12 @@ namespace ScratchBot
 
             m_sockClient = new DiscordSocketClient(new DiscordSocketConfig()
             {
-                LogLevel = LogSeverity.Verbose,
-                ExclusiveBulkDelete = true,
                 AlwaysDownloadUsers = false,
                 DefaultRetryMode = RetryMode.AlwaysFail,
-                UseSystemClock = true,
+                ExclusiveBulkDelete = true,
+                LogLevel = LogSeverity.Verbose,
                 RateLimitPrecision = RateLimitPrecision.Second,
+                UseSystemClock = true,
             });
 
             m_commands = new CommandService(new CommandServiceConfig()
@@ -64,16 +66,13 @@ namespace ScratchBot
                 SeparatorChar = ' ',
             });
 
-            m_sockClient.Log += LogAsync;
-            m_commands.Log += LogAsync;
+            m_logging = new LoggingService(m_sockClient, m_commands);
 
             m_services = ConfigureServices();
         }
 
         ~BotMain()
         {
-            m_sockClient.Log -= LogAsync;
-            m_commands.Log -= LogAsync;
             m_sockClient.MessageReceived -= HandleCommandAsync;
             m_sockClient.UserJoined -= SockClient_UserJoined;
         }
@@ -89,51 +88,6 @@ namespace ScratchBot
             {
                 await Task.Delay(500);
             }
-        }
-
-        private Task LogAsync(LogMessage msg)
-        {
-            switch (msg.Severity)
-            {
-                case LogSeverity.Critical:
-                    {
-                        Console.ForegroundColor = ConsoleColor.DarkRed;
-                        break;
-                    }
-                case LogSeverity.Error:
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        break;
-                    }
-                case LogSeverity.Warning:
-                    {
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        break;
-                    }
-                case LogSeverity.Info:
-                    {
-                        Console.ForegroundColor = ConsoleColor.Cyan;
-                        break;
-                    }
-                case LogSeverity.Verbose:
-                    {
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        break;
-                    }
-                case LogSeverity.Debug:
-                    {
-                        Console.ForegroundColor = ConsoleColor.DarkGreen;
-                        break;
-                    }
-                default:
-                    break;
-            }
-
-            Console.WriteLine($"[{DateTime.Now}]\n" +
-                              $"[{msg.Severity}] {msg.Source}: {{ {msg.Message} }} {msg.Exception}\n");
-            Console.ResetColor();
-
-            return Task.CompletedTask;
         }
 
         // If any services require the client, or the CommandService, or something else you keep on hand,
@@ -161,8 +115,7 @@ namespace ScratchBot
 
         private async Task SockClient_UserJoined(SocketGuildUser usr)
         {
-            //member role id: 694987272281653328
-            //await usr.AddRoleAsync(null, new RequestOptions() { AuditLogReason = "joined" });
+            //await usr.AddRoleAsync()
             await Task.CompletedTask;
         }
 
@@ -191,14 +144,14 @@ namespace ScratchBot
         internal async Task ShutdownAsync()
         {
             await m_sockClient.StopAsync();
-            Console.WriteLine("stopasync done\n");
+            Console.WriteLine("\nstopasync done");
 
-            Task _logout = m_sockClient.LogoutAsync();
-            await _logout;
-            Console.WriteLine("Logged out\n");
+            //TODO fix error logging out
+            await Task.Run(() => m_sockClient.LogoutAsync());
+            Console.WriteLine("\nLogged out");
 
             await Task.Run(() => m_cancellationTokenSource.Cancel());
-            Console.WriteLine("cancellation token triggert\n");
+            Console.WriteLine("\ncancellation token triggert");
         }
     }
 }
