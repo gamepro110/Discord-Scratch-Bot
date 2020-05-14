@@ -28,6 +28,32 @@ namespace ScratchBot
             await ReplyAsync(msg, embed: _embed.Description != "" ? _embed.Description != null ? _embed.Build() : null : null);
         }
 
+        [Command("peeps"), Description("sends a list of every one in your voice chat")]
+        public async Task GetPeepsFromVoice()
+        {
+            EmbedBuilder _embed = new EmbedBuilder();
+            IVoiceChannel s = (Context.User as IVoiceState).VoiceChannel;
+            if (s != null)
+            {
+                _embed.Color = Color.DarkTeal;
+                _embed.Description += DateTime.Now.ToString("yy/MM/dd hh:mm tt\n");
+                IAsyncEnumerable<IReadOnlyCollection<IUser>> users = s.GetUsersAsync();
+                await foreach (var items in users)
+                {
+                    foreach (var u in items)
+                    {
+                        _embed.Description += $"{u.Mention}\n";
+                    }
+                }
+            }
+            else
+            {
+                _embed.Color = Color.Magenta;
+                _embed.Description += "please enter a voice chat and reuse the command";
+            }
+            await ReplyAsync(embed: _embed.Build());
+        }
+
         #region Help
 
         [Command("help")]
