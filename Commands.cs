@@ -35,7 +35,7 @@ namespace ScratchBot
             IVoiceChannel s = (Context.User as IVoiceState).VoiceChannel;
             if (s != null)
             {
-                _embed.Color = Color.DarkTeal;
+                _embed.Color = Color.Teal;
                 _embed.Description += DateTime.Now.ToString("yy/MM/dd hh:mm tt\n");
                 IAsyncEnumerable<IReadOnlyCollection<IUser>> users = s.GetUsersAsync();
                 await foreach (var items in users)
