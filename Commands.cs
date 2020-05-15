@@ -62,7 +62,7 @@ namespace ScratchBot
         {
             EmbedBuilder _embed = new EmbedBuilder();
             ModuleInfo _mod;
-            if (_name == "")
+            if (string.IsNullOrEmpty(_name))
             {
                 _mod = BotMain.instance.GetCommands.Modules.FirstOrDefault(m => m.Name.Replace("Module", "").ToLower() != "");
                 if (_mod == null)
@@ -84,7 +84,7 @@ namespace ScratchBot
                     return;
                 }
 
-                _embed.Description = (_mod.Submodules.Any() ? $"Sub mods: {string.Join(", ", BotMain.CMDPrefix + _mod.Submodules.Select(m => m.Name))}" : "");
+                _embed.Description = _mod.Submodules.Any() ? $"Sub mods: {string.Join(", ", _mod.Submodules.Select(m => m.Name))}" : "";
             }
 
             _embed.Title = _mod.Name;
@@ -320,11 +320,6 @@ namespace ScratchBot
 
                 await ReplyAsync(embed: _em.Build());
             }
-
-            [Command("say"), RequireOwner(ErrorMessage = "wrong role mate", Group = "owner")]
-            [Summary("Echoes a message.")]
-            [Remarks("???")]
-            public Task SayAsync([Remainder] [Summary("The text to echo")] string echo) => ReplyAsync(echo);
 
             [Command("exit"), RequireOwner()]
             public async Task Exit()
