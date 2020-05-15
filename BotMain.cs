@@ -39,7 +39,7 @@ namespace ScratchBot
         private static void Main(string[] args)
         {
             new BotMain().MainAsync(m_cancellationTokenSource.Token).GetAwaiter().GetResult();
-            Console.ReadLine();
+            //Console.ReadLine();
         }
 
         private BotMain()
@@ -143,15 +143,14 @@ namespace ScratchBot
 
         internal async Task ShutdownAsync()
         {
+            await Task.Run(() => m_cancellationTokenSource.Cancel());
+            Console.WriteLine("\ncancellation token triggert");
+
             await m_sockClient.StopAsync();
             Console.WriteLine("\nstopasync done");
 
-            //TODO fix error logging out
+            Console.WriteLine("\nLogging out");
             await Task.Run(() => m_sockClient.LogoutAsync());
-            Console.WriteLine("\nLogged out");
-
-            await Task.Run(() => m_cancellationTokenSource.Cancel());
-            Console.WriteLine("\ncancellation token triggert");
         }
     }
 }
