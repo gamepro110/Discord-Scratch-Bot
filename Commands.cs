@@ -48,7 +48,7 @@ namespace ScratchBot
             }
             else
             {
-                _embed.Color = Color.Magenta;
+                _embed.Color = Color.Orange;
                 _embed.Description += "please enter a voice chat and reuse the command";
             }
             await ReplyAsync(embed: _embed.Build());
