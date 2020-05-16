@@ -37,19 +37,20 @@ namespace ScratchBot
             {
                 _embed.Color = Color.Teal;
                 _embed.Description += DateTime.Now.ToString("yy/MM/dd hh:mm tt\n");
-                IAsyncEnumerable<IReadOnlyCollection<IUser>> users = s.GetUsersAsync();
-                await foreach (var items in users)
+                _embed.Description += $"Channel: {s.Name}\n\n";
+
+                await foreach (var item in s.GetUsersAsync())
                 {
-                    foreach (var u in items)
+                    foreach (IUser usr in item)
                     {
-                        _embed.Description += $"{u.Mention}\n";
+                        _embed.Description += $"{usr.Username}\n";
                     }
                 }
             }
             else
             {
                 _embed.Color = Color.Orange;
-                _embed.Description += "please enter a voice chat and reuse the command";
+                _embed.Description += "enter a voice chat and reuse command";
             }
             await ReplyAsync(embed: _embed.Build());
         }
