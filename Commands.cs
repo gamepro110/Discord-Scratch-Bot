@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -41,9 +42,9 @@ namespace ScratchBot
 
                 await foreach (var item in s.GetUsersAsync())
                 {
-                    foreach (IUser usr in item)
+                    foreach (SocketGuildUser usr in item)
                     {
-                        _embed.Description += $"{usr.Username}\n";
+                        _embed.Description += $"{usr.Nickname}\n";
                     }
                 }
             }
