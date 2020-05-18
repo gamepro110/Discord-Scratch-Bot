@@ -29,18 +29,18 @@ namespace ScratchBot
             await ReplyAsync(msg, embed: _embed.Description != "" ? _embed.Description != null ? _embed.Build() : null : null);
         }
 
-        [Command("$")]
+        [Command("vl"), Description("gets a list of all the peeps in all voice chats")]
         public async Task GetAllPeepsInAllVC()
         {
             EmbedBuilder _embed = new EmbedBuilder();
             foreach (SocketVoiceChannel vc in Context.Guild.VoiceChannels)
             {
-                if (vc != null)
+                if (vc != null && vc.Users.Count > 0)
                 {
-                    _embed.Description += $"{vc.Name}\n";
+                    _embed.Description += $"{vc.Category} {vc.Name}\n";
                     foreach (var usr in vc.Users)
                     {
-                        _embed.Description += $"-{usr.Nickname ?? usr.Username}\n";
+                        _embed.Description += $"-`{usr.Nickname ?? usr.Username}`\n";
                     }
                     _embed.Description += "\n";
                 }
