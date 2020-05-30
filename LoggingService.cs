@@ -1,9 +1,13 @@
-﻿using Discord;
+using Discord;
 using Discord.Commands;
 using Discord.Webhook;
 using Discord.WebSocket;
 using System;
+using System.Collections.Specialized;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace ScratchBot
@@ -22,17 +26,20 @@ namespace ScratchBot
             BotMain.instance.GetCommands.Log -= LogAsync;
         }
 
-        private Task LogAsync(LogMessage message)
+        private async Task LogAsync(LogMessage message)
         {
+            bool _doWebhookLog = false;
             switch (message.Severity)
             {
                 case LogSeverity.Critical:
                     {
+                        _doWebhookLog = true;
                         Console.ForegroundColor = ConsoleColor.DarkRed;
                         break;
                     }
                 case LogSeverity.Error:
                     {
+                        _doWebhookLog = true;
                         Console.ForegroundColor = ConsoleColor.Red;
                         break;
                     }
@@ -60,18 +67,51 @@ namespace ScratchBot
                     break;
             }
 
+            string _msg = string.Empty;
+
             if (message.Exception is CommandException _cmdEX)
             {
-                Console.WriteLine($"\n[Command/{message.Severity}] {_cmdEX.Command.Aliases.First()}\n" +
-                                  $"Failed to execute in {_cmdEX.Context.Channel}.\n {_cmdEX}");
+                _msg = $"\n[Command/{message.Severity}] {_cmdEX.Command.Aliases.First()}\n" +
+                                  $"Failed to execute in {_cmdEX.Context.Channel}.\n {_cmdEX}";
+                Console.WriteLine(_msg);
             }
             else
             {
-                Console.WriteLine($"\n[General/{message.Severity}] ({message})");
+                _msg = $"\n[General/{message.Severity}] ({message})";
+                Console.WriteLine(_msg);
+            }
+
+            if (_doWebhookLog)
+            {
+                await WebhookLog(_msg);
             }
 
             Console.ResetColor();
-            return Task.CompletedTask;
+            await Task.CompletedTask;
+        }
+
+        private Task WebhookLog(string _msg)
+        {
+            using (WebClient _client = new WebClient())
+            {
+                NameValueCollection _data = new NameValueCollection
+                {
+                    {"username", "ScratchBotWebHook"},
+                    {"content", _msg},
+                };
+
+                byte[] _outp = _client.UploadValues("https://discordapp.com/api/webhooks/701783478521299067/yZQZZ1gBKY27kEMbCsxs_8-lVV9Rjm3B1gtPnILu53bkqKtMb_UeJcuMKp4OQkYzDlQY", _data);
+
+                if (Encoding.UTF8.GetString(_outp) == string.Empty)
+                {
+                    return Task.CompletedTask;
+                }
+                else
+                {
+                    File.WriteAllText($"{Environment.CurrentDirectory}/A__log.txt", Encoding.UTF8.GetString(_outp));
+                    return Task.Delay(3);
+                }
+            }
         }
     }
 }
