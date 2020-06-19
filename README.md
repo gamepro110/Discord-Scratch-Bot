@@ -1,5 +1,8 @@
 # Discord-Scratch-Bot
-personal discord bot
+personal discord bot.
+
+i made this bot for personal use and plan to keep working on it.
+
 
 ## Commands
     - no

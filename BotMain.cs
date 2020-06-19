@@ -25,7 +25,7 @@ namespace ScratchBot
         private readonly LoggingService m_logging = null;
 
         internal const string CMDPrefix = "$";
-        private const string Bot_Variable = "Discord_Scratch_Bot_Token";
+        private static readonly string Bot_Variable = "Discord_Scratch_Bot_Token";
 
         #region getters
 
