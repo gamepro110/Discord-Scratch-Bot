@@ -96,6 +96,8 @@ namespace ScratchBot
             else
             {
                 await m_logging.WebTest("no bot_var found");
+                Console.WriteLine("no bot_var found");
+                Console.ReadLine();
             }
         }
 

@@ -18,7 +18,7 @@ namespace ScratchBot
             await ReplyAsync("awh :crying_cat_face:");
         }
 
-        [Command("wisp", true), Description("leaving a message without peeps knowing who it comes from")]
+        [Command("wisper", true), Description("leaving a message without peeps knowing who it comes from")]
         [RequireUserPermission(ChannelPermission.ManageMessages), RequireBotPermission(ChannelPermission.ManageMessages)]
         public async Task Wisp([Remainder] string msg)
         {
@@ -29,7 +29,7 @@ namespace ScratchBot
             await ReplyAsync(msg, embed: _embed.Description != "" ? _embed.Description != null ? _embed.Build() : null : null);
         }
 
-        [Command("vl"), Description("gets a list of all the peeps in all voice chats")]
+        [Command("Voice_all"), Description("gets a list of all the peeps in all voice chats")]
         public async Task GetAllPeepsInAllVC()
         {
             EmbedBuilder _embed = new EmbedBuilder();
@@ -49,7 +49,7 @@ namespace ScratchBot
             await ReplyAsync(embed: _embed.Build());
         }
 
-        [Command("peeps"), Description("sends a list of every one in your voice chat")]
+        [Command("myVoice"), Description("sends a list of every one in your voice chat")]
         public async Task GetPeepsFromVoice()
         {
             EmbedBuilder _embed = new EmbedBuilder();
