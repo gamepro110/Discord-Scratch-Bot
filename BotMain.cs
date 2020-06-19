@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -45,11 +46,13 @@ namespace ScratchBot
         {
             if (args.Length > 0)
             {
-                Console.WriteLine(args[0]);
-                Console.WriteLine(Environment.GetEnvironmentVariable(args[1]) ?? "null :(");
+                string arg1 = args[0];
+                string arg2 = Environment.GetEnvironmentVariable(args[1]) ?? args[1];
+                Console.WriteLine(arg1);
+                Console.WriteLine(arg2);
                 Console.ReadLine();
                 //make the console app run async
-                new BotMain().MainAsync(m_cancellationTokenSource.Token, args[0]).GetAwaiter().GetResult();
+                new BotMain(arg2).MainAsync(m_cancellationTokenSource.Token, arg1).GetAwaiter().GetResult();
             }
             else
             {
@@ -57,13 +60,13 @@ namespace ScratchBot
             }
         }
 
-#nullable enable
-
-        private BotMain(string? _webhookLink = null)
+        private BotMain(string _webhookLink = "")
         {
-            if (string.IsNullOrWhiteSpace(_webhookLink))
+            if (string.IsNullOrEmpty(_webhookLink))
             {
-                throw new ArgumentException("no webhook found", nameof(_webhookLink));
+                //throw new ArgumentException("no webhook found", nameof(_webhookLink));
+                Console.WriteLine("webhook is empty");
+                return;
             }
 
             instance = this;
@@ -93,8 +96,6 @@ namespace ScratchBot
             m_services = ConfigureServices();
             WebhookLink = _webhookLink;
         }
-
-#nullable disable
 
         ~BotMain()
         {
