@@ -45,7 +45,7 @@ namespace ScratchBot
             {
                 string _clientKey = args[0];
                 string _webhook = args[1];
-                Console.ReadLine();
+
                 //make the console app run async
                 new BotMain(_webhook).MainAsync(m_cancellationTokenSource.Token, _clientKey).GetAwaiter().GetResult();
             }
