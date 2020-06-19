@@ -20,7 +20,7 @@ namespace ScratchBot
 
         [Command("wisp", true), Description("leaving a message without peeps knowing who it comes from")]
         [RequireUserPermission(ChannelPermission.ManageMessages), RequireBotPermission(ChannelPermission.ManageMessages)]
-        public async Task Wisp([Remainder]string msg)
+        public async Task Wisp([Remainder] string msg)
         {
             EmbedBuilder _embed = new EmbedBuilder();
 
@@ -160,7 +160,7 @@ namespace ScratchBot
             private Color _col = new Color();
             private int _roll = 0;
 
-            private EmbedBuilder _em = new EmbedBuilder();
+            private readonly EmbedBuilder _em = new EmbedBuilder();
 
             private async Task DieMSG(Die die)
             {
@@ -265,7 +265,7 @@ namespace ScratchBot
             [Group("Ping")]
             public class PingRequest : ModuleBase<SocketCommandContext>
             {
-                private EmbedBuilder m_embed = new EmbedBuilder();
+                private readonly EmbedBuilder m_embed = new EmbedBuilder();
 
                 [Command("bot"), RequireOwner(Group = "owner")]
                 [Summary("Bot latency ping")]
@@ -305,6 +305,13 @@ namespace ScratchBot
             }
 
             #endregion ping
+
+            [Command("web")]
+            [RequireOwner]
+            public async Task WebTest([Remainder] string _msg)
+            {
+                await BotMain.instance.GetLogging.WebTest(_msg);
+            }
 
             [Command("purge")]
             [Summary("Cleanup x messages. (default = 10)")]

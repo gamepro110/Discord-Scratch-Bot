@@ -14,6 +14,8 @@ namespace ScratchBot
 {
     internal class LoggingService
     {
+        private const string WebhookLink = "Discord_Scratch_Bot_WebhookLink";
+
         public LoggingService(DiscordSocketClient _client, CommandService _command)
         {
             _client.Log += LogAsync;
@@ -67,7 +69,7 @@ namespace ScratchBot
                     break;
             }
 
-            string _msg = string.Empty;
+            string _msg;
 
             if (message.Exception is CommandException _cmdEX)
             {
@@ -90,27 +92,37 @@ namespace ScratchBot
             await Task.CompletedTask;
         }
 
+        public Task WebTest(string _msg) => WebhookLog(_msg);
+
         private Task WebhookLog(string _msg)
         {
-            using (WebClient _client = new WebClient())
+            if (Environment.GetEnvironmentVariable(WebhookLink) != null)
             {
-                NameValueCollection _data = new NameValueCollection
+                using (WebClient _client = new WebClient())
+                {
+                    NameValueCollection _data = new NameValueCollection
                 {
                     {"username", "ScratchBotWebHook"},
                     {"content", _msg},
                 };
 
-                byte[] _outp = _client.UploadValues("https://discordapp.com/api/webhooks/701783478521299067/yZQZZ1gBKY27kEMbCsxs_8-lVV9Rjm3B1gtPnILu53bkqKtMb_UeJcuMKp4OQkYzDlQY", _data);
+                    byte[] _outp = _client.UploadValues(Environment.GetEnvironmentVariable(WebhookLink), _data);
 
-                if (Encoding.UTF8.GetString(_outp) == string.Empty)
-                {
-                    return Task.CompletedTask;
+                    if (Encoding.UTF8.GetString(_outp) == string.Empty)
+                    {
+                        return Task.CompletedTask;
+                    }
+                    else
+                    {
+                        File.WriteAllText($"{Environment.CurrentDirectory}/A__log.txt", Encoding.UTF8.GetString(_outp));
+                        return Task.Delay(3);
+                    }
                 }
-                else
-                {
-                    File.WriteAllText($"{Environment.CurrentDirectory}/A__log.txt", Encoding.UTF8.GetString(_outp));
-                    return Task.Delay(3);
-                }
+            }
+            else
+            {
+                File.WriteAllText($"{Environment.CurrentDirectory}/A__log.txt", "Failed to send webhook msg due to not having the environment var set up.");
+                return Task.CompletedTask;
             }
         }
     }

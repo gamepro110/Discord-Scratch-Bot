@@ -22,9 +22,10 @@ namespace ScratchBot
         private readonly IServiceProvider m_services = null;
         private static CancellationTokenSource m_cancellationTokenSource = null;
 
-        private LoggingService m_logging = null;
+        private readonly LoggingService m_logging = null;
 
         internal const string CMDPrefix = "$";
+        private const string Bot_Variable = "Discord_Scratch_Bot_Token";
 
         #region getters
 
@@ -32,14 +33,15 @@ namespace ScratchBot
         internal DiscordSocketClient GetSock { get => m_sockClient; }
         internal CommandService GetCommands { get => m_commands; }
         internal IServiceProvider GetService { get => m_services; }
+        internal LoggingService GetLogging { get => m_logging; }
 
         #endregion getters
 
         [STAThread]
         private static void Main(string[] args)
         {
+            //make the console app run async
             new BotMain().MainAsync(m_cancellationTokenSource.Token).GetAwaiter().GetResult();
-            //Console.ReadLine();
         }
 
         private BotMain()
@@ -79,14 +81,21 @@ namespace ScratchBot
 
         public async Task MainAsync(CancellationToken _token)
         {
-            await InitCommands();
-
-            await m_sockClient.LoginAsync(TokenType.Bot, "NzAwMDc1MTQ4Nzc0MjExNTk1.XpgZWA.GqbjisMUVQMK127xHzFSLNCj8K4", true);
-            await m_sockClient.StartAsync();
-
-            while (!_token.IsCancellationRequested)
+            if (Environment.GetEnvironmentVariable(Bot_Variable) != null)
             {
-                await Task.Delay(500);
+                await InitCommands();
+
+                await m_sockClient.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable(Bot_Variable), true);
+                await m_sockClient.StartAsync();
+
+                while (!_token.IsCancellationRequested)
+                {
+                    await Task.Delay(500);
+                }
+            }
+            else
+            {
+                await m_logging.WebTest("no bot_var found");
             }
         }
 
