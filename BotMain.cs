@@ -17,6 +17,9 @@ namespace ScratchBot
 
     internal class BotMain
     {
+        //Discord_Scratch_Bot_Token
+        //Discord_Scratch_Bot_WebhookLink
+
         private readonly DiscordSocketClient m_sockClient = null;
         private readonly CommandService m_commands = null;
         private readonly IServiceProvider m_services = null;
@@ -25,7 +28,6 @@ namespace ScratchBot
         private readonly LoggingService m_logging = null;
 
         internal const string CMDPrefix = "$";
-        private static readonly string Bot_Variable = "Discord_Scratch_Bot_Token";
 
         #region getters
 
@@ -34,20 +36,36 @@ namespace ScratchBot
         internal CommandService GetCommands { get => m_commands; }
         internal IServiceProvider GetService { get => m_services; }
         internal LoggingService GetLogging { get => m_logging; }
+        internal string WebhookLink { get; }
 
         #endregion getters
 
         [STAThread]
         private static void Main(string[] args)
         {
-            //make the console app run async
-            //new BotMain().MainAsync(m_cancellationTokenSource.Token).GetAwaiter().GetResult();
-            Console.WriteLine(Environment.GetEnvironmentVariable(Bot_Variable) ?? "null");
-            Console.ReadLine();
+            if (args.Length > 0)
+            {
+                //make the console app run async
+                //new BotMain().MainAsync(m_cancellationTokenSource.Token, args[0]).GetAwaiter().GetResult();
+                Console.WriteLine(Environment.GetEnvironmentVariable(args[0]) ?? "null");
+                Console.WriteLine(Environment.GetEnvironmentVariable(args[1]) ?? "null");
+                Console.ReadLine();
+            }
+            else
+            {
+                Console.WriteLine("no args given");
+            }
         }
 
-        private BotMain()
+#nullable enable
+
+        private BotMain(string? _webhookLink = null)
         {
+            if (string.IsNullOrWhiteSpace(_webhookLink))
+            {
+                throw new ArgumentException("no webhook found", nameof(_webhookLink));
+            }
+
             instance = this;
 
             m_cancellationTokenSource = new CancellationTokenSource();
@@ -70,10 +88,13 @@ namespace ScratchBot
                 SeparatorChar = ' ',
             });
 
-            m_logging = new LoggingService(m_sockClient, m_commands);
+            m_logging = new LoggingService(m_sockClient, m_commands, _webhookLink);
 
             m_services = ConfigureServices();
+            WebhookLink = _webhookLink;
         }
+
+#nullable disable
 
         ~BotMain()
         {
@@ -81,13 +102,13 @@ namespace ScratchBot
             m_sockClient.UserJoined -= SockClient_UserJoined;
         }
 
-        public async Task MainAsync(CancellationToken _token)
+        public async Task MainAsync(CancellationToken _token, string _botVar)
         {
-            if (Environment.GetEnvironmentVariable(Bot_Variable) != null)
+            if (Environment.GetEnvironmentVariable(_botVar) != null)
             {
                 await InitCommands();
 
-                await m_sockClient.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable(Bot_Variable), true);
+                await m_sockClient.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable(_botVar), true);
                 await m_sockClient.StartAsync();
 
                 while (!_token.IsCancellationRequested)
@@ -97,7 +118,7 @@ namespace ScratchBot
             }
             else
             {
-                await m_logging.WebTest("no bot_var found");
+                await m_logging.WebTest(WebhookLink, "no bot_var found");
                 Console.WriteLine("no bot_var found");
                 Console.ReadLine();
             }

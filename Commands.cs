@@ -310,7 +310,7 @@ namespace ScratchBot
             [RequireOwner]
             public async Task WebTest([Remainder] string _msg)
             {
-                await BotMain.instance.GetLogging.WebTest(_msg);
+                await BotMain.instance.GetLogging.WebTest(BotMain.instance.WebhookLink, _msg);
             }
 
             [Command("purge")]

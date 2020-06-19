@@ -14,12 +14,13 @@ namespace ScratchBot
 {
     internal class LoggingService
     {
-        private const string WebhookLink = "Discord_Scratch_Bot_WebhookLink";
+        private readonly string m_webhookLink;
 
-        public LoggingService(DiscordSocketClient _client, CommandService _command)
+        public LoggingService(DiscordSocketClient _client, CommandService _command, string _webhookLink)
         {
             _client.Log += LogAsync;
             _command.Log += LogAsync;
+            m_webhookLink = _webhookLink;
         }
 
         ~LoggingService()
@@ -85,18 +86,18 @@ namespace ScratchBot
 
             if (_doWebhookLog)
             {
-                await WebhookLog(_msg);
+                await WebhookLog(m_webhookLink, _msg);
             }
 
             Console.ResetColor();
             await Task.CompletedTask;
         }
 
-        public Task WebTest(string _msg) => WebhookLog(_msg);
+        public Task WebTest(string _link, string _msg) => WebhookLog(_link, _msg);
 
-        private Task WebhookLog(string _msg)
+        private Task WebhookLog(string _link, string _msg)
         {
-            if (Environment.GetEnvironmentVariable(WebhookLink) != null)
+            if (Environment.GetEnvironmentVariable(_link) != null)
             {
                 using (WebClient _client = new WebClient())
                 {
@@ -106,7 +107,7 @@ namespace ScratchBot
                     {"content", _msg},
                 };
 
-                    byte[] _outp = _client.UploadValues(Environment.GetEnvironmentVariable(WebhookLink), _data);
+                    byte[] _outp = _client.UploadValues(Environment.GetEnvironmentVariable(_link), _data);
 
                     if (Encoding.UTF8.GetString(_outp) == string.Empty)
                     {
