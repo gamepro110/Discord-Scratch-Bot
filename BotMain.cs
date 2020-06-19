@@ -41,7 +41,9 @@ namespace ScratchBot
         private static void Main(string[] args)
         {
             //make the console app run async
-            new BotMain().MainAsync(m_cancellationTokenSource.Token).GetAwaiter().GetResult();
+            //new BotMain().MainAsync(m_cancellationTokenSource.Token).GetAwaiter().GetResult();
+            Console.WriteLine(Environment.GetEnvironmentVariable(Bot_Variable) ?? "null");
+            Console.ReadLine();
         }
 
         private BotMain()
