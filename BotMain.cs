@@ -45,11 +45,11 @@ namespace ScratchBot
         {
             if (args.Length > 0)
             {
-                //make the console app run async
-                //new BotMain().MainAsync(m_cancellationTokenSource.Token, args[0]).GetAwaiter().GetResult();
-                Console.WriteLine(Environment.GetEnvironmentVariable(args[0]) ?? "null :(");
+                Console.WriteLine(args[0]);
                 Console.WriteLine(Environment.GetEnvironmentVariable(args[1]) ?? "null :(");
                 Console.ReadLine();
+                //make the console app run async
+                new BotMain().MainAsync(m_cancellationTokenSource.Token, args[0]).GetAwaiter().GetResult();
             }
             else
             {
@@ -104,11 +104,11 @@ namespace ScratchBot
 
         public async Task MainAsync(CancellationToken _token, string _botVar)
         {
-            if (Environment.GetEnvironmentVariable(_botVar) != null)
+            if (_botVar != null)
             {
                 await InitCommands();
 
-                await m_sockClient.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable(_botVar), true);
+                await m_sockClient.LoginAsync(TokenType.Bot, _botVar, true);
                 await m_sockClient.StartAsync();
 
                 while (!_token.IsCancellationRequested)
