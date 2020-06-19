@@ -47,8 +47,8 @@ namespace ScratchBot
             {
                 //make the console app run async
                 //new BotMain().MainAsync(m_cancellationTokenSource.Token, args[0]).GetAwaiter().GetResult();
-                Console.WriteLine(Environment.GetEnvironmentVariable(args[0]) ?? "null");
-                Console.WriteLine(Environment.GetEnvironmentVariable(args[1]) ?? "null");
+                Console.WriteLine(Environment.GetEnvironmentVariable(args[0]) ?? "null :(");
+                Console.WriteLine(Environment.GetEnvironmentVariable(args[1]) ?? "null :(");
                 Console.ReadLine();
             }
             else
