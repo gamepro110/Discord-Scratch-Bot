@@ -18,9 +18,6 @@ namespace ScratchBot
 
     internal class BotMain
     {
-        //Discord_Scratch_Bot_Token
-        //Discord_Scratch_Bot_WebhookLink
-
         private readonly DiscordSocketClient m_sockClient = null;
         private readonly CommandService m_commands = null;
         private readonly IServiceProvider m_services = null;
@@ -46,13 +43,11 @@ namespace ScratchBot
         {
             if (args.Length > 0)
             {
-                string arg1 = args[0];
-                string arg2 = Environment.GetEnvironmentVariable(args[1]) ?? args[1];
-                Console.WriteLine(arg1);
-                Console.WriteLine(arg2);
+                string _clientKey = args[0];
+                string _webhook = args[1];
                 Console.ReadLine();
                 //make the console app run async
-                new BotMain(arg2).MainAsync(m_cancellationTokenSource.Token, arg1).GetAwaiter().GetResult();
+                new BotMain(_webhook).MainAsync(m_cancellationTokenSource.Token, _clientKey).GetAwaiter().GetResult();
             }
             else
             {
@@ -64,9 +59,7 @@ namespace ScratchBot
         {
             if (string.IsNullOrEmpty(_webhookLink))
             {
-                //throw new ArgumentException("no webhook found", nameof(_webhookLink));
-                Console.WriteLine("webhook is empty");
-                return;
+                throw new ArgumentException("no webhook found", nameof(_webhookLink));
             }
 
             instance = this;
@@ -100,7 +93,6 @@ namespace ScratchBot
         ~BotMain()
         {
             m_sockClient.MessageReceived -= HandleCommandAsync;
-            m_sockClient.UserJoined -= SockClient_UserJoined;
         }
 
         public async Task MainAsync(CancellationToken _token, string _botVar)
@@ -144,14 +136,7 @@ namespace ScratchBot
         private async Task InitCommands()
         {
             m_sockClient.MessageReceived += HandleCommandAsync;
-            m_sockClient.UserJoined += SockClient_UserJoined;
             await m_commands.AddModulesAsync(Assembly.GetEntryAssembly(), m_services);
-        }
-
-        private async Task SockClient_UserJoined(SocketGuildUser usr)
-        {
-            //await usr.AddRoleAsync()
-            await Task.CompletedTask;
         }
 
         private async Task HandleCommandAsync(SocketMessage _msgParam)
