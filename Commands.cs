@@ -306,13 +306,6 @@ namespace ScratchBot
 
             #endregion ping
 
-            [Command("web")]
-            [RequireOwner]
-            public async Task WebTest([Remainder] string _msg)
-            {
-                await BotMain.instance.GetLogging.WebTest(BotMain.instance.WebhookLink, _msg);
-            }
-
             [Command("purge")]
             [Summary("Cleanup x messages. (default = 10)")]
             [RequireUserPermission(ChannelPermission.ManageMessages), RequireBotPermission(ChannelPermission.ManageMessages)]
