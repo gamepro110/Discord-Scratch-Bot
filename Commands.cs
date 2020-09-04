@@ -302,6 +302,22 @@ namespace ScratchBot
                     m_embed.Description = $"web ping\n {{{_totaltime} ms}}";
                     await ReplyAsync(embed: m_embed.Build());
                 }
+
+                [Command("all"), RequireOwner(ErrorMessage = "nope, ur no owner...")]
+                public async Task DualPing()
+                {
+                    try
+                    {
+                        await BotPing();
+                        await WebPing();
+                    }
+                    catch (Exception ex)
+                    {
+                        m_embed.Title = "Error during pingall";
+                        m_embed.AddField(ex.InnerException.Message, ex.Message);
+                        await ReplyAsync(embed: m_embed.Build());
+                    }
+                }
             }
 
             #endregion ping
