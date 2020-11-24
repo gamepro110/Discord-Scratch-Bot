@@ -359,6 +359,13 @@ namespace ScratchBot
                 await ReplyAsync(embed: _em.Build());
             }
 
+            [Command("web"), RequireOwner]
+            public async Task ThrowTest(string _remindMsg)
+            {
+                await BotMain.instance.GetLogging.WebTest(_remindMsg);
+                await ReplyAsync("send reminder");
+            }
+
             [Command("exit"), RequireOwner()]
             public async Task Exit()
             {

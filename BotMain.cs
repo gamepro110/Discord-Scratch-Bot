@@ -1,5 +1,5 @@
 using System;
-using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,7 +22,6 @@ namespace ScratchBot
         private readonly CommandService m_commands = null;
         private readonly IServiceProvider m_services = null;
         private static CancellationTokenSource m_cancellationTokenSource = null;
-
         private readonly LoggingService m_logging = null;
 
         internal const string CMDPrefix = "$";
@@ -34,40 +33,31 @@ namespace ScratchBot
         internal CommandService GetCommands { get => m_commands; }
         internal IServiceProvider GetService { get => m_services; }
         internal LoggingService GetLogging { get => m_logging; }
-        internal string WebhookLink { get; }
+
+        private static string m_webhook = null;
+        internal string WebhookLink { get => m_webhook; }
 
         #endregion getters
 
         [STAThread]
-        private static void Main(string[] args)
+        private static void Main()
         {
-#if DEBUG
-            args = new[] {
-                "",
-                "",
-            };
-#endif
-            if (args.Length > 0)
-            {
-                string _clientKey = args[0];
-                string _webhook = args[1];
+            string[] args = File.ReadAllLines("token.tkn");
 
+            if (args.Length == 2)
+            {
+                m_webhook = args[1];
                 //make the console app run async
-                new BotMain(_webhook).MainAsync(m_cancellationTokenSource.Token, _clientKey).GetAwaiter().GetResult();
+                new BotMain().MainAsync(m_cancellationTokenSource.Token, args[0]).GetAwaiter().GetResult();
             }
             else
             {
-                Console.WriteLine("no args given");
+                FileLogger.LogToFile("no args given");
             }
         }
 
-        private BotMain(string _webhookLink = "")
+        private BotMain()
         {
-            if (string.IsNullOrEmpty(_webhookLink))
-            {
-                throw new ArgumentException("no webhook found", nameof(_webhookLink));
-            }
-
             instance = this;
 
             m_cancellationTokenSource = new CancellationTokenSource();
@@ -90,10 +80,9 @@ namespace ScratchBot
                 SeparatorChar = ' ',
             });
 
-            m_logging = new LoggingService(m_sockClient, m_commands, _webhookLink);
+            m_logging = new LoggingService(m_sockClient, m_commands);
 
             m_services = ConfigureServices();
-            WebhookLink = _webhookLink;
         }
 
         ~BotMain()
@@ -101,13 +90,13 @@ namespace ScratchBot
             m_sockClient.MessageReceived -= HandleCommandAsync;
         }
 
-        public async Task MainAsync(CancellationToken _token, string _botVar)
+        public async Task MainAsync(CancellationToken _token, string _authenticatonToken)
         {
-            if (_botVar != null)
+            if (_authenticatonToken != null)
             {
                 await InitCommands();
 
-                await m_sockClient.LoginAsync(TokenType.Bot, _botVar, true);
+                await m_sockClient.LoginAsync(TokenType.Bot, _authenticatonToken, true);
                 await m_sockClient.StartAsync();
 
                 while (!_token.IsCancellationRequested)
@@ -117,7 +106,7 @@ namespace ScratchBot
             }
             else
             {
-                await m_logging.WebTest(WebhookLink, "no bot_var found");
+                await m_logging.WebTest("no bot_var found");
                 Console.WriteLine("no bot_var found");
                 Console.ReadLine();
             }
@@ -154,7 +143,7 @@ namespace ScratchBot
             int pos = 0;
 
             //HasMentionPrefix(m_sockClient.CurrentUser
-            if (msg.HasStringPrefix(CMDPrefix, ref pos))
+            if (msg.HasStringPrefix(CMDPrefix, ref pos, StringComparison.OrdinalIgnoreCase))
             {
                 SocketCommandContext context = new SocketCommandContext(m_sockClient, msg);
 

@@ -1,10 +1,8 @@
 using Discord;
 using Discord.Commands;
-using Discord.Webhook;
 using Discord.WebSocket;
 using System;
 using System.Collections.Specialized;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -14,13 +12,10 @@ namespace ScratchBot
 {
     internal class LoggingService
     {
-        private readonly string m_webhookLink;
-
-        public LoggingService(DiscordSocketClient _client, CommandService _command, string _webhookLink)
+        public LoggingService(DiscordSocketClient _client, CommandService _command)
         {
             _client.Log += LogAsync;
             _command.Log += LogAsync;
-            m_webhookLink = _webhookLink;
         }
 
         ~LoggingService()
@@ -32,17 +27,20 @@ namespace ScratchBot
         private async Task LogAsync(LogMessage message)
         {
             bool _doWebhookLog = false;
+            bool _doFileLog = false;
             switch (message.Severity)
             {
                 case LogSeverity.Critical:
                     {
                         _doWebhookLog = true;
+                        _doFileLog = true;
                         Console.ForegroundColor = ConsoleColor.DarkRed;
                         break;
                     }
                 case LogSeverity.Error:
                     {
                         _doWebhookLog = true;
+                        _doFileLog = true;
                         Console.ForegroundColor = ConsoleColor.Red;
                         break;
                     }
@@ -86,43 +84,46 @@ namespace ScratchBot
 
             if (_doWebhookLog)
             {
-                await WebhookLog(m_webhookLink, _msg);
+                await WebhookLog(_msg);
+            }
+
+            if (_doFileLog)
+            {
+                FileLogger.LogToFile(_msg);
             }
 
             Console.ResetColor();
             await Task.CompletedTask;
         }
 
-        public Task WebTest(string _link, string _msg) => WebhookLog(_link, _msg);
+        public Task WebTest(string _msg) => WebhookLog(_msg);
 
-        private Task WebhookLog(string _link, string _msg)
+        private Task WebhookLog(string _msg)
         {
-            if (Environment.GetEnvironmentVariable(_link) != null)
+            if (!string.IsNullOrEmpty(BotMain.instance.WebhookLink))
             {
-                using (WebClient _client = new WebClient())
+                using WebClient _client = new WebClient();
+                NameValueCollection _data = new NameValueCollection
                 {
-                    NameValueCollection _data = new NameValueCollection
-                {
-                    {"username", "ScratchBotWebHook"},
+                    {"username", "ScratchBot_WebHook"},
                     {"content", _msg},
                 };
 
-                    byte[] _outp = _client.UploadValues(Environment.GetEnvironmentVariable(_link), _data);
+                byte[] _outp = _client.UploadValues(BotMain.instance.WebhookLink, _data);
 
-                    if (Encoding.UTF8.GetString(_outp) == string.Empty)
-                    {
-                        return Task.CompletedTask;
-                    }
-                    else
-                    {
-                        File.WriteAllText($"{Environment.CurrentDirectory}/A__log.txt", Encoding.UTF8.GetString(_outp));
-                        return Task.Delay(3);
-                    }
+                if (Encoding.UTF8.GetString(_outp) == string.Empty)
+                {
+                    return Task.CompletedTask;
+                }
+                else
+                {
+                    FileLogger.LogToFile(Encoding.UTF8.GetString(_outp));
+                    return Task.Delay(3);
                 }
             }
             else
             {
-                File.WriteAllText($"{Environment.CurrentDirectory}/A__log.txt", "Failed to send webhook msg due to not having the environment var set up.");
+                FileLogger.LogToFile("Failed to send webhook msg due to not having the environment var set up.");
                 return Task.CompletedTask;
             }
         }

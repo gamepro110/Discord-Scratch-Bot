@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "ScratchBot": {
+      "commandName": "Project",
+      "remoteDebugEnabled": false,
+      "remoteDebugMachine": "",
+      "authenticationMode": "Windows",
+      "nativeDebugging": true
+    }
+  }
+}
