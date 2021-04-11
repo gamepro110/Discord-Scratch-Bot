@@ -72,7 +72,7 @@ namespace ScratchBot
 
             if (message.Exception is CommandException _cmdEX)
             {
-                _msg = $"\n[Command/{message.Severity}] {_cmdEX.Command.Aliases.First()}\n" +
+                _msg = $"\n[Command/{message.Severity}] {_cmdEX.Command.Aliases[0]}\n" +
                                   $"Failed to execute in {_cmdEX.Context.Channel}.\n {_cmdEX}";
                 Console.WriteLine(_msg);
             }
@@ -96,20 +96,20 @@ namespace ScratchBot
             await Task.CompletedTask;
         }
 
-        public Task WebTest(string _msg) => WebhookLog(_msg);
+        public static Task WebTest(string _msg) => WebhookLog(_msg);
 
-        private Task WebhookLog(string _msg)
+        private static Task WebhookLog(string _msg)
         {
-            if (!string.IsNullOrEmpty(BotMain.instance.WebhookLink))
+            if (!string.IsNullOrEmpty(BotMain.WebhookLink))
             {
-                using WebClient _client = new WebClient();
-                NameValueCollection _data = new NameValueCollection
+                using WebClient _client = new();
+                NameValueCollection _data = new()
                 {
-                    {"username", "ScratchBot_WebHook"},
-                    {"content", _msg},
+                    { "username", "ScratchBot_WebHook" },
+                    { "content", _msg },
                 };
 
-                byte[] _outp = _client.UploadValues(BotMain.instance.WebhookLink, _data);
+                byte[] _outp = _client.UploadValues(BotMain.WebhookLink, _data);
 
                 if (Encoding.UTF8.GetString(_outp) == string.Empty)
                 {

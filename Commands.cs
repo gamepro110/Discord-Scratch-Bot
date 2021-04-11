@@ -22,7 +22,7 @@ namespace ScratchBot
         [RequireUserPermission(ChannelPermission.ManageMessages), RequireBotPermission(ChannelPermission.ManageMessages)]
         public async Task Wisp([Remainder] string msg)
         {
-            EmbedBuilder _embed = new EmbedBuilder();
+            EmbedBuilder _embed = new();
 
             await (Context.Channel as ITextChannel).DeleteMessageAsync(Context.Message);
 
@@ -32,7 +32,7 @@ namespace ScratchBot
         [Command("Voice_all"), Description("gets a list of all the peeps in all voice chats")]
         public async Task GetAllPeepsInAllVC()
         {
-            EmbedBuilder _embed = new EmbedBuilder();
+            EmbedBuilder _embed = new();
             foreach (SocketVoiceChannel vc in Context.Guild.VoiceChannels)
             {
                 if (vc != null && vc.Users.Count > 0)
@@ -52,7 +52,7 @@ namespace ScratchBot
         [Command("myVoice"), Description("sends a list of every one in your voice chat")]
         public async Task GetPeepsFromVoice()
         {
-            EmbedBuilder _embed = new EmbedBuilder();
+            EmbedBuilder _embed = new();
             IVoiceChannel s = (Context.User as IVoiceState).VoiceChannel;
             if (s != null)
             {
@@ -82,7 +82,7 @@ namespace ScratchBot
         [Summary("Displays All Commands")]
         public async Task Help(string _name = "")
         {
-            EmbedBuilder _embed = new EmbedBuilder();
+            EmbedBuilder _embed = new();
             ModuleInfo _mod;
             if (string.IsNullOrEmpty(_name))
             {
@@ -126,7 +126,7 @@ namespace ScratchBot
             }
         }
 
-        private void AddCommand(CommandInfo info, ref EmbedBuilder embed)
+        private static void AddCommand(CommandInfo info, ref EmbedBuilder embed)
         {
             embed.AddField(f =>
             {
@@ -157,10 +157,10 @@ namespace ScratchBot
 
             private Die _die = Die.D20;
             private int _dieRolled = 0;
-            private Color _col = new Color();
+            private Color _col = new();
             private int _roll = 0;
 
-            private readonly EmbedBuilder _em = new EmbedBuilder();
+            private readonly EmbedBuilder _em = new();
 
             private async Task DieMSG(Die die)
             {
@@ -191,12 +191,12 @@ namespace ScratchBot
                 return Task.FromResult(Color.Teal);
             }
 
-            private Task<int> GetRandomDieValue(int num = 4)
+            private static Task<int> GetRandomDieValue(int num = 4)
             {
                 num += 1;
                 num *= 100;
                 num -= 51;
-                Random rand = new Random();
+                Random rand = new();
                 num = rand.Next(100, num);
                 num /= 100;
                 return Task.FromResult(num);
@@ -265,7 +265,7 @@ namespace ScratchBot
             [Group("Ping")]
             public class PingRequest : ModuleBase<SocketCommandContext>
             {
-                private readonly EmbedBuilder m_embed = new EmbedBuilder();
+                private readonly EmbedBuilder m_embed = new();
 
                 [Command("bot"), RequireOwner(Group = "owner")]
                 [Summary("Bot latency ping")]
@@ -286,7 +286,7 @@ namespace ScratchBot
                 { // https://stackoverflow.com/questions/1281176/making-a-ping-inside-of-my-c-sharp-application
                     decimal _totaltime = 0;
                     int _timeout = 120;
-                    Ping pingsender = new Ping();
+                    Ping pingsender = new();
 
                     for (int i = 0; i < 4; i++)
                     {
@@ -327,7 +327,7 @@ namespace ScratchBot
             [RequireUserPermission(ChannelPermission.ManageMessages), RequireBotPermission(ChannelPermission.ManageMessages)]
             public async Task PurgeMessages(int _amount = 10)
             {
-                EmbedBuilder _em = new EmbedBuilder();
+                EmbedBuilder _em = new();
 
                 if (_amount <= 0)
                 {
@@ -362,7 +362,7 @@ namespace ScratchBot
             [Command("web"), RequireOwner]
             public async Task ThrowTest(string _remindMsg)
             {
-                await BotMain.instance.GetLogging.WebTest(_remindMsg);
+                await LoggingService.WebTest(_remindMsg);
                 await ReplyAsync("send reminder");
             }
 

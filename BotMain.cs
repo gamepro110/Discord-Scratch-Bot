@@ -3,18 +3,20 @@ using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 
 using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
 
 namespace ScratchBot
 {
-    //https://docs.stillu.cc/guides/concepts/logging.html api
-    //https://docs.microsoft.com/en-us/dotnet/core/rid-catalog Build info
-    //dotnet publish -c Release -r linux-arm
+    // https://docs.stillu.cc/guides/concepts/logging.html api
+    // https://docs.microsoft.com/en-us/dotnet/core/rid-catalog Build info
+    // dotnet publish -c Release -r linux-arm
 
     internal class BotMain
     {
@@ -23,6 +25,7 @@ namespace ScratchBot
         private readonly IServiceProvider m_services = null;
         private static CancellationTokenSource m_cancellationTokenSource = null;
         private readonly LoggingService m_logging = null;
+        private Dictionary<Task<IResult>, SocketUserMessage> _Tasks;
 
         internal const string CMDPrefix = "$";
 
@@ -35,7 +38,7 @@ namespace ScratchBot
         internal LoggingService GetLogging { get => m_logging; }
 
         private static string m_webhook = null;
-        internal string WebhookLink { get => m_webhook; }
+        internal static string WebhookLink { get => m_webhook; }
 
         #endregion getters
 
@@ -48,7 +51,7 @@ namespace ScratchBot
             {
                 m_webhook = args[1];
                 //make the console app run async
-                new BotMain().MainAsync(m_cancellationTokenSource.Token, args[0]).GetAwaiter().GetResult();
+                new BotMain().MainAsync(args[0], m_cancellationTokenSource.Token).GetAwaiter().GetResult();
             }
             else
             {
@@ -83,6 +86,8 @@ namespace ScratchBot
             m_logging = new LoggingService(m_sockClient, m_commands);
 
             m_services = ConfigureServices();
+
+            _Tasks = new();
         }
 
         ~BotMain()
@@ -90,7 +95,7 @@ namespace ScratchBot
             m_sockClient.MessageReceived -= HandleCommandAsync;
         }
 
-        public async Task MainAsync(CancellationToken _token, string _authenticatonToken)
+        public async Task MainAsync(string _authenticatonToken, CancellationToken _token)
         {
             if (_authenticatonToken != null)
             {
@@ -101,12 +106,22 @@ namespace ScratchBot
 
                 while (!_token.IsCancellationRequested)
                 {
-                    await Task.Delay(500);
+                    if (_Tasks.Count > 0)
+                    {
+                        Task<IResult> finishedTask = await Task.WhenAny(_Tasks.Keys.ToArray());
+
+                        if (!finishedTask.Result.IsSuccess && finishedTask.Result.Error != CommandError.UnknownCommand)
+                        {
+                            await Task.Run(() => _Tasks[finishedTask].Channel.SendMessageAsync(finishedTask.Result.ErrorReason));
+                        }
+                        _Tasks.Remove(finishedTask);
+                    }
+                    await Task.Delay(900, _token);
                 }
             }
             else
             {
-                await m_logging.WebTest("no bot_var found");
+                await LoggingService.WebTest("no bot_var found");
                 Console.WriteLine("no bot_var found");
                 Console.ReadLine();
             }
@@ -136,24 +151,19 @@ namespace ScratchBot
 
         private async Task HandleCommandAsync(SocketMessage _msgParam)
         {
-            if (!(_msgParam is SocketUserMessage msg)) return;
+            if (_msgParam is not SocketUserMessage msg) return;
 
             if (msg.Author.Id == m_sockClient.CurrentUser.Id || msg.Author.IsBot) return;
 
             int pos = 0;
 
-            //HasMentionPrefix(m_sockClient.CurrentUser
             if (msg.HasStringPrefix(CMDPrefix, ref pos, StringComparison.OrdinalIgnoreCase))
             {
-                SocketCommandContext context = new SocketCommandContext(m_sockClient, msg);
-
-                IResult result = await m_commands.ExecuteAsync(context, pos, null);
-
-                if (!result.IsSuccess && result.Error != CommandError.UnknownCommand)
-                {
-                    await msg.Channel.SendMessageAsync(result.ErrorReason);
-                }
+                SocketCommandContext context = new(m_sockClient, msg);
+                _Tasks.Add(m_commands.ExecuteAsync(context, pos, null), msg);
             }
+
+            await Task.Delay(1);
         }
 
         internal async Task ShutdownAsync()
