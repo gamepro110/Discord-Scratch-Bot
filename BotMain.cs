@@ -51,11 +51,19 @@ namespace ScratchBot
             {
                 m_webhook = args[1];
                 //make the console app run async
-                new BotMain().MainAsync(args[0], m_cancellationTokenSource.Token).GetAwaiter().GetResult();
+                new BotMain()
+                    .MainAsync(args[0], m_cancellationTokenSource.Token)
+                    .GetAwaiter()
+                    .GetResult();
             }
             else
             {
-                FileLogger.LogToFile("no args given");
+                FileLogger.LogToFile(
+                    "Invalid Args Given.\n" +
+                    "expected:\n" +
+                    "token\n" +
+                    "webhook link"
+                    );
             }
         }
 

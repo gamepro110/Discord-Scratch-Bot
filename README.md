@@ -26,7 +26,7 @@ i made this bot for personal use and plan to keep working on it.
     - help <submodule name>
         - displays all abailable commands in the selected submodule (or submodules submodule)
     
-# (owner only!!)
+## (owner only!!)
     - sudo
         - ping
             - web
@@ -46,3 +46,27 @@ i made this bot for personal use and plan to keep working on it.
     
                 
 **made by [Karlo Koelewijn](www.karlokoelewijn.wordpress.com)**
+
+### TODO
+
+- [ ] launch script
+    - [ ] add .sh script for launching bot (no new window, background procces)
+- [ ] bot rebuild
+    - [ ] event based?
+    - [ ] make test suite
+        - [ ] offline
+        - [ ] github workflow
+        - [ ] tests
+            - [ ] each commands
+            - [ ] functionality
+            - [ ] logger
+    - [ ] web interface?
+    - [ ] rework bot into multiple libs
+        - [ ] core
+        - [ ] commands
+        - [ ] logger
+        - [ ] webhook
+            - [ ] flesh out functionallity
+    - [ ] cleanup solution
+    - [ ] add comments
+    - [ ] ajust log levels
